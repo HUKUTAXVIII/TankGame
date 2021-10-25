@@ -19,7 +19,10 @@ namespace TankLib {
         public int Speed { set; get; }
         public int HP { set; get; }
         public string Texture { set; get; }
-    
+
+        public Tank() { 
+            
+        }
         public Tank(Point loc, Point size, Direction dir, int speed)
         {
             this.Location = loc;

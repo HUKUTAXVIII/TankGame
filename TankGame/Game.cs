@@ -2,6 +2,10 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TankLib;
+using ClientServer;
+using System.Text.Json;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace TankGame
 {
@@ -11,6 +15,9 @@ namespace TankGame
         private SpriteBatch _spriteBatch;
         private Texture2D tanktexture;
         private Tank tank;
+        private Client client;
+        private List<Tank> tanks;
+       
         public Game()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -21,6 +28,21 @@ namespace TankGame
         protected override void Initialize()
         {
             tank = new Tank(new System.Drawing.Point(64,64),new System.Drawing.Point(32,32), Direction.FRONT,2);
+            client = new Client("127.0.0.1",8000);
+            tanks = new List<Tank>();
+
+            while (!client.socket.Connected)
+            {
+                try
+                {
+                    client.Connect();
+                }
+                catch (System.Exception)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+
             base.Initialize();
         }
 
@@ -57,8 +79,17 @@ namespace TankGame
                 tank.Dir = Direction.RIGHT;
                 tank.Move();
             }
+            tanks.Clear();
+            try
+            {
+            client.Send(Client.FromStringToBytes(JsonSerializer.Serialize<Tank>(this.tank)));
+            tanks.AddRange(JsonSerializer.Deserialize<List<Tank>>(Client.FromBytesToString(client.Get())));
 
-            
+            }
+            catch (System.Exception)
+            {
+            }
+
 
             base.Update(gameTime);
         }
@@ -96,6 +127,16 @@ namespace TankGame
             _spriteBatch.Begin();
 
             drawTank(this.tank,false);
+            try
+            {
+                foreach (var t in tanks) {
+                    drawTank(t,true);
+                }
+
+            }
+            catch (System.Exception)
+            {
+            }
 
             _spriteBatch.End();
 

@@ -15,6 +15,7 @@ namespace ClientServer
         public List<Client> handler { get; }
 
         public List<Action<int>> actions { set; get; }
+        public Dictionary<int,List<byte>> lastData { set; get; }
 
         public Server(string ip, int port)
         {
@@ -22,6 +23,7 @@ namespace ClientServer
             ipPoint = new IPEndPoint(IPAddress.Parse(ip), port);
             handler = new List<Client>();
             actions = new List<Action<int>>();
+            lastData = new Dictionary<int, List<byte>>();
         }
 
         public void Start()
@@ -46,6 +48,9 @@ namespace ClientServer
             int bytes = 0;
             byte[] array = new byte[255];
 
+            try
+            {
+
             do
             {
                 bytes = handler[index].socket.Receive(array, array.Length, 0);
@@ -56,7 +61,18 @@ namespace ClientServer
 
 
             } while (handler[index].socket.Available > 0);
+            }
+            catch (Exception e)
+            {
 
+            }
+            if (lastData.ContainsKey(index))
+            {
+                lastData[index] = data;
+            }
+            else {
+                lastData.Add(index,data);
+            }
 
             return data;
         }
@@ -76,11 +92,10 @@ namespace ClientServer
         }
         public void ConnectionUpdate()
         {
-            while (true)
-            {
+           
                 this.AddClient("127.0.0.1", 8000);
 
-            }
+         
         }
         public static string FromBytesToString(List<byte> bytes)
         {
