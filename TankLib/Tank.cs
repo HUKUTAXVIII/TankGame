@@ -28,7 +28,7 @@ namespace TankLib {
             this.Speed = speed;
     
             this.HP = 100;
-            this.Texture = "Tank.png";
+            this.Texture = "tank.png";
     
         }
     

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using TankLib;
 
 namespace TankGame
 {
@@ -8,7 +9,8 @@ namespace TankGame
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-
+        private Texture2D tanktexture;
+        private Tank tank;
         public Game()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -18,8 +20,7 @@ namespace TankGame
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
+            tank = new Tank(new System.Drawing.Point(64,64),new System.Drawing.Point(32,32), Direction.FRONT,2);
             base.Initialize();
         }
 
@@ -27,7 +28,7 @@ namespace TankGame
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            tanktexture = Content.Load<Texture2D>("tank");
         }
 
         protected override void Update(GameTime gameTime)
@@ -35,16 +36,68 @@ namespace TankGame
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            var key = Keyboard.GetState();
+
+            if (key.IsKeyDown(Keys.Up))
+            {
+                tank.Dir = Direction.FRONT;
+                tank.Move();
+            }
+            else if (key.IsKeyDown(Keys.Down))
+            {
+                tank.Dir = Direction.BACK;
+                tank.Move();
+            }
+            else if (key.IsKeyDown(Keys.Left))
+            {
+                tank.Dir = Direction.LEFT;
+                tank.Move();
+            }
+            else if (key.IsKeyDown(Keys.Right)) {
+                tank.Dir = Direction.RIGHT;
+                tank.Move();
+            }
+
+            
 
             base.Update(gameTime);
+        }
+
+        private void drawTank(Tank tank, bool isEnemy) {
+
+            SpriteEffects effect = (tank.Dir == Direction.BACK) ? SpriteEffects.FlipVertically : SpriteEffects.None;
+            float side = 0;
+            if (tank.Dir == Direction.RIGHT)
+            {
+                side = (float)1.5708;
+            }
+            else if (tank.Dir == Direction.LEFT)
+            {
+                side = (float)4.71239;
+            }
+
+
+            _spriteBatch.Draw(
+                tanktexture,
+                new Vector2(tank.Location.X, tank.Location.Y),
+                null,
+                (!isEnemy)?Color.White:Color.Red,
+                side,
+                new Vector2(20, 25),
+                1,
+                effect,
+                0);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+
+            drawTank(this.tank,false);
+
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
