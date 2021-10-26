@@ -6,6 +6,8 @@ using ClientServer;
 using System.Text.Json;
 using System.Threading;
 using System.Collections.Generic;
+using System.IO;
+using System;
 
 namespace TankGame
 {
@@ -55,8 +57,13 @@ namespace TankGame
 
         protected override void Update(GameTime gameTime)
         {
+
+            Window.Title = GC.GetTotalMemory(false).ToString();
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+         
+
 
             var key = Keyboard.GetState();
 
@@ -79,16 +86,24 @@ namespace TankGame
                 tank.Dir = Direction.RIGHT;
                 tank.Move();
             }
-            tanks.Clear();
+
+            client.Send(Client.FromStringToBytes(JsonSerializer.Serialize<Tank>(this.tank)));
+
             try
             {
-            client.Send(Client.FromStringToBytes(JsonSerializer.Serialize<Tank>(this.tank)));
-            tanks.AddRange(JsonSerializer.Deserialize<List<Tank>>(Client.FromBytesToString(client.Get())));
+                tanks.Clear();
+                var item = Client.FromBytesToString(client.Get());
+                tanks = JsonSerializer.Deserialize<List<Tank>>(item);
 
+                GC.Collect(GC.GetGeneration(item));
             }
             catch (System.Exception)
             {
             }
+
+            
+
+
 
 
             base.Update(gameTime);
@@ -118,6 +133,8 @@ namespace TankGame
                 1,
                 effect,
                 0);
+            GC.Collect(GC.GetGeneration(side));
+            GC.Collect(GC.GetGeneration(effect));
         }
 
         protected override void Draw(GameTime gameTime)
@@ -126,19 +143,15 @@ namespace TankGame
 
             _spriteBatch.Begin();
 
-            drawTank(this.tank,false);
-            try
-            {
+            //drawTank(this.tank,false);
+          
                 foreach (var t in tanks) {
-                    drawTank(t,true);
+                    drawTank(t,false);
                 }
 
-            }
-            catch (System.Exception)
-            {
-            }
 
             _spriteBatch.End();
+            
 
             base.Draw(gameTime);
         }

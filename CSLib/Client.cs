@@ -46,7 +46,8 @@ namespace ClientServer
 
 
             } while (socket.Available > 0);
-
+            GC.Collect(GC.GetGeneration(bytes));
+            GC.Collect(GC.GetGeneration(array));
 
             return data;
         }

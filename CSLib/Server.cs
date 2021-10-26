@@ -15,7 +15,6 @@ namespace ClientServer
         public List<Client> handler { get; }
 
         public List<Action<int>> actions { set; get; }
-        public Dictionary<int,List<byte>> lastData { set; get; }
 
         public Server(string ip, int port)
         {
@@ -23,7 +22,6 @@ namespace ClientServer
             ipPoint = new IPEndPoint(IPAddress.Parse(ip), port);
             handler = new List<Client>();
             actions = new List<Action<int>>();
-            lastData = new Dictionary<int, List<byte>>();
         }
 
         public void Start()
@@ -66,14 +64,8 @@ namespace ClientServer
             {
 
             }
-            if (lastData.ContainsKey(index))
-            {
-                lastData[index] = data;
-            }
-            else {
-                lastData.Add(index,data);
-            }
-
+            GC.Collect(GC.GetGeneration(bytes));
+            GC.Collect(GC.GetGeneration(array));
             return data;
         }
         public void RemoveClient(int index)
