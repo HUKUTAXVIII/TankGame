@@ -91,8 +91,25 @@ namespace TankGame
 
             try
             {
-                tanks.Clear();
+                //tanks.Clear();
+
                 var item = Client.FromBytesToString(client.Get());
+                var tankarr = JsonSerializer.Deserialize<List<Tank>>(item);
+
+                if (tankarr.Count == tanks.Count)
+                {
+                    for (int i = 0; i < tanks.Count; i++)
+                    {
+                        tanks[i].Location = new System.Drawing.Point(tankarr[i].Location.X, tankarr[i].Location.Y);
+                        tanks[i].Dir = tankarr[i].Dir;
+                        tanks[i].HP = tankarr[i].HP;
+                    }
+                }
+                else{
+                    tanks.Clear();
+                    tanks.AddRange(tankarr);
+                }
+
                 tanks = JsonSerializer.Deserialize<List<Tank>>(item);
 
                 GC.Collect(GC.GetGeneration(item));
@@ -121,6 +138,10 @@ namespace TankGame
             {
                 side = (float)4.71239;
             }
+            else if (tank.Dir == Direction.BACK)
+            {
+                side = (float)4.71239- (float)1.5708;
+            }
 
 
             _spriteBatch.Draw(
@@ -131,7 +152,7 @@ namespace TankGame
                 side,
                 new Vector2(20, 25),
                 1,
-                effect,
+                SpriteEffects.None,
                 0);
             GC.Collect(GC.GetGeneration(side));
             GC.Collect(GC.GetGeneration(effect));
