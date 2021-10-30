@@ -16,6 +16,7 @@ namespace TankGame
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private Texture2D tanktexture;
+        private Texture2D bullettexture;
         private Tank tank;
         private Client client;
         private List<Tank> tanks;
@@ -53,19 +54,26 @@ namespace TankGame
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             tanktexture = Content.Load<Texture2D>("tank");
+            bullettexture = Content.Load<Texture2D>("bullet");
         }
 
         protected override void Update(GameTime gameTime)
         {
 
-            Window.Title = GC.GetTotalMemory(false).ToString();
+            Window.Title = tank.bullet.isFalling.ToString();
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
+            if (this.tank.HP < 0) {
+                Exit();
+            }
          
 
 
             var key = Keyboard.GetState();
+            if (key.IsKeyDown(Keys.Space) && !tank.bullet.isFalling) {
+                tank.bullet = new Bullet(tank.Location,tank.Dir,tank.Speed*2);
+                tank.bullet.Shoot();
+            }
 
             if (key.IsKeyDown(Keys.Up))
             {
@@ -87,7 +95,30 @@ namespace TankGame
                 tank.Move();
             }
 
+            if (tank.bullet.isFalling)
+            {
+                tank.bullet.Move();
+                if (tank.bullet.Tick > 200)
+                {
+                    tank.bullet.isFalling = false;
+                }
+                //if (tank.bullet.Location.X >= 0 && tank.bullet.Location.X <= Window.ClientBounds.Size.X)
+                //{
+                //    tank.bullet.isFalling = true;
+                //}
+                //else {
+                //    
+                //}
+                foreach (var item in tanks)
+                {
+                    if (!item.Equals(tank))
+                    {
+                        tank.bullet.Land(item);
+                    }
+                }
+            }
             client.Send(Client.FromStringToBytes(JsonSerializer.Serialize<Tank>(this.tank)));
+
 
             try
             {
@@ -113,6 +144,11 @@ namespace TankGame
                 tanks = JsonSerializer.Deserialize<List<Tank>>(item);
 
                 GC.Collect(GC.GetGeneration(item));
+
+
+
+
+
             }
             catch (System.Exception)
             {
@@ -157,6 +193,39 @@ namespace TankGame
             GC.Collect(GC.GetGeneration(side));
             GC.Collect(GC.GetGeneration(effect));
         }
+        private void drawBullet(Tank tank)
+        {
+
+            SpriteEffects effect = (tank.Dir == Direction.BACK) ? SpriteEffects.FlipVertically : SpriteEffects.None;
+            float side = 0;
+            if (tank.bullet.Dir == Direction.RIGHT)
+            {
+                side = (float)1.5708;
+            }
+            else if (tank.bullet.Dir == Direction.LEFT)
+            {
+                side = (float)4.71239;
+            }
+            else if (tank.bullet.Dir == Direction.BACK)
+            {
+                side = (float)4.71239 - (float)1.5708;
+            }
+
+           
+            _spriteBatch.Draw(
+                bullettexture,
+                new Vector2(tank.bullet.Location.X, tank.bullet.Location.Y),
+                null,
+                Color.White,
+                side,
+                new Vector2(5, 15),
+                1,
+                SpriteEffects.None,
+                0);
+            GC.Collect(GC.GetGeneration(side));
+            GC.Collect(GC.GetGeneration(effect));
+        }
+
 
         protected override void Draw(GameTime gameTime)
         {
@@ -168,8 +237,11 @@ namespace TankGame
           
                 foreach (var t in tanks) {
                     drawTank(t,false);
+                    if (t.bullet.isFalling)
+                    {
+                        drawBullet(t);
+                    }
                 }
-
 
             _spriteBatch.End();
             

@@ -79,11 +79,9 @@ namespace ServerConsole
 
                 while (true)
                 {
-
+                    
                     try
                     {
-                        //Console.WriteLine(tanks.Count);
-                            //var t = tanks;
                             for (int i = 0; i < tanks.Count; i++)
                             {
                                 server.Send(Server.FromStringToBytes(JsonSerializer.Serialize(tanks)), i);
@@ -95,36 +93,7 @@ namespace ServerConsole
 
                         Console.WriteLine("Send Error!");
                     }
-                    //Console.WriteLine(GC.GetTotalMemory(false));
-                    //try
-                    //{
 
-                    //for (int i = 0; i < server.handler.Count; i++)
-                    //{
-                    //    for (int index = 0; index < server.handler.Count; index++)
-                    //    {
-                    //        List<Tank> tanks = new List<Tank>();
-                    //        foreach (var item in server.lastData.Where(item => item.Key != index).ToList())
-                    //        {
-                    //            tanks.Add(JsonSerializer.Deserialize<Tank>(Client.FromBytesToString(item.Value)));
-                    //        }
-
-                    //        for (int j = 0; j < server.handler.Count; j++)
-                    //        {
-                    //            if (j != index)
-                    //            {
-                    //                server.Send(Server.FromStringToBytes(JsonSerializer.Serialize<List<Tank>>(tanks)), i);
-                    //            }
-                    //        }
-
-                    //    }
-                    //}
-                    //}
-                    //catch (Exception)
-                    //{
-
-                    //}
-                    //Console.ReadLine();
                 }
             }
             catch (Exception e)
