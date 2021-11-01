@@ -88,7 +88,7 @@ namespace TankGame
 
             try
             {
-            Window.Title = tank.HP.ToString();
+            //Window.Title = tank.HP.ToString();
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             if (this.tank.HP < 0) {
@@ -103,23 +103,25 @@ namespace TankGame
                 tank.bullet.Shoot();
             }
 
-               
+            Window.Title = tank.ToString() + "\t size: "+tank.Size.X +" "+ tank.Size.Y;
             if (key.IsKeyDown(Keys.Up))
             {
                 tank.Dir = Direction.FRONT;
-                    var check = this.tank;
-                    check.Move();
-                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(this.tank.GetRectangle().X, this.tank.GetRectangle().Y, this.tank.GetRectangle().Width, this.tank.GetRectangle().Height)) == Rectangle.Empty))))
+                    Tank check = new Tank(this.tank.Location,tank.Size,tank.Dir,tank.HP);
+                    //check.Move();
+                    
+                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(check.GetRectangle().X, check.GetRectangle().Y, check.GetRectangle().Width, check.GetRectangle().Height)) == Rectangle.Empty))))
                     {
                         tank.Move();
+                    
                     }
             }
             else if (key.IsKeyDown(Keys.Down))
             {
                 tank.Dir = Direction.BACK;
-                    var check = this.tank;
-                    check.Move();
-                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(this.tank.GetRectangle().X, this.tank.GetRectangle().Y, this.tank.GetRectangle().Width, this.tank.GetRectangle().Height)) == Rectangle.Empty))))
+                    Tank check = new Tank(this.tank.Location, tank.Size, tank.Dir, tank.HP);
+                    //check.Move();
+                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(check.GetRectangle().X, check.GetRectangle().Y, check.GetRectangle().Width, check.GetRectangle().Height)) == Rectangle.Empty))))
                     {
                         tank.Move();
                     }
@@ -127,18 +129,18 @@ namespace TankGame
             else if (key.IsKeyDown(Keys.Left))
             {
                     tank.Dir = Direction.LEFT;
-                    var check = this.tank;
-                    check.Move();
-                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(this.tank.GetRectangle().X, this.tank.GetRectangle().Y, this.tank.GetRectangle().Width, this.tank.GetRectangle().Height)) == Rectangle.Empty))))
+                    Tank check = new Tank(this.tank.Location, tank.Size, tank.Dir, tank.HP);
+                   //check.Move();
+                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(check.GetRectangle().X, check.GetRectangle().Y, check.GetRectangle().Width, check.GetRectangle().Height)) == Rectangle.Empty))))
                     {
                         tank.Move();
                     }
                 }
             else if (key.IsKeyDown(Keys.Right)) {
                 tank.Dir = Direction.RIGHT;
-                    var check = this.tank;
-                    check.Move();
-                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(this.tank.GetRectangle().X, this.tank.GetRectangle().Y, this.tank.GetRectangle().Width, this.tank.GetRectangle().Height)) == Rectangle.Empty))))
+                    Tank check = new Tank(this.tank.Location, tank.Size, tank.Dir, tank.HP);
+                    //check.Move();
+                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(check.GetRectangle().X, check.GetRectangle().Y, check.GetRectangle().Width, check.GetRectangle().Height)) == Rectangle.Empty))))
                     {
                         tank.Move();
                     }
