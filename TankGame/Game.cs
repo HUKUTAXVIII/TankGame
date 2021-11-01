@@ -8,6 +8,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Linq;
 
 namespace TankGame
 {
@@ -20,6 +21,8 @@ namespace TankGame
         private Tank tank;
         private Client client;
         private List<Tank> tanks;
+        private Texture2D walltexture;
+        private List<List<Point>> walls;
        
         public Game()
         {
@@ -33,6 +36,28 @@ namespace TankGame
             tank = new Tank(new System.Drawing.Point(64,64),new System.Drawing.Point(32,32), Direction.FRONT,2);
             client = new Client("127.0.0.1",8000);
             tanks = new List<Tank>();
+            walls = new List<List<Point>>();
+
+            for (int i = 0; i < Window.ClientBounds.Height; i+=32) {
+                walls.Add(new List<Point>());
+                for (int j = 0; j < Window.ClientBounds.Width; j+=32)
+                {
+                    if (i == 0 || j == 0 || j >= Window.ClientBounds.Width-32 || i >= Window.ClientBounds.Height-32) { 
+                        walls[i/32].Add(new Point(j,i));
+                    }
+                    if (i == 32*10 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32)) {
+                        walls[i / 32].Add(new Point(j, i));
+                    }
+                    if (i == 32 * 4 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32))
+                    {
+                        walls[i / 32].Add(new Point(j, i));
+                    }
+                    if (j == 32 * 12 && (i >= Window.ClientBounds.Height * 0.20 && i <= Window.ClientBounds.Height * 0.8 - 32)) {
+                        walls[i / 32].Add(new Point(j, i));
+                    }
+                }
+            }
+
 
             while (!client.socket.Connected)
             {
@@ -55,12 +80,15 @@ namespace TankGame
 
             tanktexture = Content.Load<Texture2D>("tank");
             bullettexture = Content.Load<Texture2D>("bullet");
+            walltexture = Content.Load<Texture2D>("wall32");
         }
 
         protected override void Update(GameTime gameTime)
         {
 
-            Window.Title = tank.bullet.isFalling.ToString();
+            try
+            {
+            Window.Title = tank.HP.ToString();
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             if (this.tank.HP < 0) {
@@ -75,25 +103,49 @@ namespace TankGame
                 tank.bullet.Shoot();
             }
 
+               
             if (key.IsKeyDown(Keys.Up))
             {
                 tank.Dir = Direction.FRONT;
-                tank.Move();
+                    var check = this.tank;
+                    check.Move();
+                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(this.tank.GetRectangle().X, this.tank.GetRectangle().Y, this.tank.GetRectangle().Width, this.tank.GetRectangle().Height)) == Rectangle.Empty))))
+                    {
+                        tank.Move();
+                    }
             }
             else if (key.IsKeyDown(Keys.Down))
             {
                 tank.Dir = Direction.BACK;
-                tank.Move();
-            }
+                    var check = this.tank;
+                    check.Move();
+                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(this.tank.GetRectangle().X, this.tank.GetRectangle().Y, this.tank.GetRectangle().Width, this.tank.GetRectangle().Height)) == Rectangle.Empty))))
+                    {
+                        tank.Move();
+                    }
+                }
             else if (key.IsKeyDown(Keys.Left))
             {
-                tank.Dir = Direction.LEFT;
-                tank.Move();
-            }
+                    tank.Dir = Direction.LEFT;
+                    var check = this.tank;
+                    check.Move();
+                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(this.tank.GetRectangle().X, this.tank.GetRectangle().Y, this.tank.GetRectangle().Width, this.tank.GetRectangle().Height)) == Rectangle.Empty))))
+                    {
+                        tank.Move();
+                    }
+                }
             else if (key.IsKeyDown(Keys.Right)) {
                 tank.Dir = Direction.RIGHT;
-                tank.Move();
-            }
+                    var check = this.tank;
+                    check.Move();
+                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(this.tank.GetRectangle().X, this.tank.GetRectangle().Y, this.tank.GetRectangle().Width, this.tank.GetRectangle().Height)) == Rectangle.Empty))))
+                    {
+                        tank.Move();
+                    }
+                }
+
+
+
 
             if (tank.bullet.isFalling)
             {
@@ -102,26 +154,17 @@ namespace TankGame
                 {
                     tank.bullet.isFalling = false;
                 }
-                //if (tank.bullet.Location.X >= 0 && tank.bullet.Location.X <= Window.ClientBounds.Size.X)
-                //{
-                //    tank.bullet.isFalling = true;
-                //}
-                //else {
-                //    
-                //}
-                foreach (var item in tanks)
-                {
-                    if (!item.Equals(tank))
+                    for(int i = 0;i < tanks.Count ;i++)
                     {
-                        tank.bullet.Land(item);
+                        if (tanks[i].ToString()!=tank.ToString())
+                        {
+                            if (tank.bullet.Land(ref tanks, i)) {
+                                tanks[i].HP -= 25;
+                            }
+                        }
                     }
-                }
             }
             client.Send(Client.FromStringToBytes(JsonSerializer.Serialize<Tank>(this.tank)));
-
-
-            try
-            {
                 //tanks.Clear();
 
                 var item = Client.FromBytesToString(client.Get());
@@ -233,8 +276,19 @@ namespace TankGame
 
             _spriteBatch.Begin();
 
+
+            walls.ToList().ForEach((row) =>
+            {
+                row.ForEach((item)=> {
+                    _spriteBatch.Draw(walltexture, new Rectangle(item.X,item.Y,32,32),Color.Orange);
+                });
+            });
+
+           // _spriteBatch.Draw(walltexture, new Vector2(walls[0][0].X, walls[0][0].Y), Color.Orange);
+
             //drawTank(this.tank,false);
-          
+            try
+            {
                 foreach (var t in tanks) {
                     drawTank(t,false);
                     if (t.bullet.isFalling)
@@ -243,6 +297,13 @@ namespace TankGame
                     }
                 }
 
+
+            }
+            catch (Exception)
+            {
+
+               
+            }
             _spriteBatch.End();
             
 

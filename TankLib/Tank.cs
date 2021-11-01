@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace TankLib {
@@ -32,11 +33,10 @@ namespace TankLib {
             Tick = 0;
         }
         public void Shoot() => this.isFalling = true;
-        public bool Land(Tank tank) {
-            if (Rectangle.Intersect(new Rectangle(tank.Location, new Size(1, 1)), new Rectangle(this.Location, new Size(5, 5))) != Rectangle.Empty)
+        public bool Land(ref List<Tank> tank,int index) {
+            if (Rectangle.Intersect(new Rectangle(tank[index].Location, new Size(1, 1)), new Rectangle(this.Location, new Size(5, 5))) != Rectangle.Empty)
             {
                 this.isFalling = false;
-                tank.HP -= 25;
                 return true;
             }
             else {
@@ -121,10 +121,17 @@ namespace TankLib {
                     break;
             }
         }
-    
-    
-    
-    
-    
+
+        public Rectangle GetRectangle() {
+            return new Rectangle(this.Location,new Size(this.Size));
+        }
+
+        public override string ToString()
+        {
+            return this.Location.X+" "+ this.Location.Y+" "+this.HP+" "+this.Dir.ToString();
+        }
+
+
+
     }
 }
