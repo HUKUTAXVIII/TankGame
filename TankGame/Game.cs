@@ -37,31 +37,42 @@ namespace TankGame
             client = new Client("127.0.0.1",8000);
             tanks = new List<Tank>();
 
-            walls = new List<Wall>();
-            for (int i = 0; i < Window.ClientBounds.Height; i += 32)
+            
+            if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Tanks\map.txt"))
             {
-                for (int j = 0; j < Window.ClientBounds.Width; j += 32)
+                walls = new List<Wall>();
+                for (int i = 0; i < Window.ClientBounds.Height; i += 32)
                 {
-                    
-                    if (i == 0 || j == 0 || j >= Window.ClientBounds.Width - 32 || i >= Window.ClientBounds.Height - 32)
+                    for (int j = 0; j < Window.ClientBounds.Width; j += 32)
                     {
-                        walls.Add(new Wall(j, i));
+
+                        if (i == 0 || j == 0 || j >= Window.ClientBounds.Width - 32 || i >= Window.ClientBounds.Height - 32)
+                        {
+                            walls.Add(new Wall(j, i));
+                        }
+                        if (i == 32 * 10 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32))
+                        {
+                            walls.Add(new Wall(j, i));
+                        }
+                        if (i == 32 * 4 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32))
+                        {
+                            walls.Add(new Wall(j, i));
+                        }
+                        if (j == 32 * 12 && (i >= Window.ClientBounds.Height * 0.20 && i <= Window.ClientBounds.Height * 0.8 - 32))
+                        {
+                            walls.Add(new Wall(j, i));
+                        }
+
+
                     }
-                    if (i == 32*10 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32)) {
-                          walls.Add(new Wall(j, i));
-                      }
-                      if (i == 32 * 4 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32))
-                      {
-                        walls.Add(new Wall(j, i));
-                      }
-                      if (j == 32 * 12 && (i >= Window.ClientBounds.Height * 0.20 && i <= Window.ClientBounds.Height * 0.8 - 32)) {
-                        walls.Add(new Wall(j, i));
-                      }
-
-
                 }
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(this.walls, Newtonsoft.Json.Formatting.Indented);
+                Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Tanks");
+                File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Tanks\map.txt", json);
             }
-
+            else {
+                this.walls = Newtonsoft.Json.JsonConvert.DeserializeObject< List<Wall>>(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Tanks\map.txt"));
+            }
 
                 //walls = new List<List<Wall>>();
 
