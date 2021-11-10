@@ -22,7 +22,7 @@ namespace TankGame
         private Client client;
         private List<Tank> tanks;
         private Texture2D walltexture;
-        private List<List<Point>> walls;
+        private List<Wall> walls;
        
         public Game()
         {
@@ -33,34 +33,67 @@ namespace TankGame
 
         protected override void Initialize()
         {
-            tank = new Tank(new System.Drawing.Point(64,64),new System.Drawing.Point(32,32), Direction.FRONT,2);
+            tank = new Tank(new System.Drawing.Point(300,300),new System.Drawing.Point(20,20), Direction.FRONT,2);
             client = new Client("127.0.0.1",8000);
             tanks = new List<Tank>();
-            walls = new List<List<Point>>();
 
-            for (int i = 0; i < Window.ClientBounds.Height; i+=32) {
-                walls.Add(new List<Point>());
-                for (int j = 0; j < Window.ClientBounds.Width; j+=32)
+            walls = new List<Wall>();
+            for (int i = 0; i < Window.ClientBounds.Height; i += 32)
+            {
+                for (int j = 0; j < Window.ClientBounds.Width; j += 32)
                 {
-                    if (i == 0 || j == 0 || j >= Window.ClientBounds.Width-32 || i >= Window.ClientBounds.Height-32) { 
-                        walls[i/32].Add(new Point(j,i));
-                    }
-                    if (i == 32*10 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32)) {
-                        walls[i / 32].Add(new Point(j, i));
-                    }
-                    if (i == 32 * 4 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32))
+                    
+                    if (i == 0 || j == 0 || j >= Window.ClientBounds.Width - 32 || i >= Window.ClientBounds.Height - 32)
                     {
-                        walls[i / 32].Add(new Point(j, i));
-                    }
-                    if (j == 32 * 12 && (i >= Window.ClientBounds.Height * 0.20 && i <= Window.ClientBounds.Height * 0.8 - 32)) {
-                        walls[i / 32].Add(new Point(j, i));
+                        walls.Add(new Wall(j, i));
                     }
                 }
             }
 
 
-            while (!client.socket.Connected)
-            {
+                //walls = new List<List<Wall>>();
+
+
+                //if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Tanks\map.txt"))
+                //{
+                //    this.walls = JsonSerializer.Deserialize<List<List<Wall>>>(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\TanksGame\map.txt"));
+                //    this.tank = JsonSerializer.Deserialize<Tank>(File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\TanksGame\player.txt"));
+                //}
+                //else {
+
+                //    for (int i = 0; i < Window.ClientBounds.Height; i += 32)
+                //    {
+                //        walls.Add(new List<Wall>());
+                //        for (int j = 0; j < Window.ClientBounds.Width; j += 32)
+                //        {
+                //            if (i == 0 || j == 0 || j >= Window.ClientBounds.Width - 32 || i >= Window.ClientBounds.Height - 32)
+                //            {
+                //                walls[i / 32].Add(new Wall(j, i));
+                //            }
+                //            //if (i == 32*10 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32)) {
+                //            //    walls[i / 32].Add(new Point(j, i));
+                //            //}
+                //            //if (i == 32 * 4 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32))
+                //            //{
+                //            //    walls[i / 32].Add(new Point(j, i));
+                //            //}
+                //            //if (j == 32 * 12 && (i >= Window.ClientBounds.Height * 0.20 && i <= Window.ClientBounds.Height * 0.8 - 32)) {
+                //            //    walls[i / 32].Add(new Point(j, i));
+                //            //}
+                //        }
+                //    }
+                //    Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Tanks");
+                //    var json = JsonSerializer.Serialize(this.walls);
+                //    File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Tanks\map.txt",json);
+                //    //File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Tanks\player.txt", JsonSerializer.Serialize(this.tank));
+
+
+                //}
+
+
+
+                while (!client.socket.Connected)
+                {
                 try
                 {
                     client.Connect();
@@ -69,7 +102,7 @@ namespace TankGame
                 {
                     Thread.Sleep(100);
                 }
-            }
+                }
 
             base.Initialize();
         }
@@ -88,12 +121,15 @@ namespace TankGame
 
             try
             {
-            //Window.Title = tank.HP.ToString();
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-            if (this.tank.HP < 0) {
-                Exit();
-            }
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                {
+                    //File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Tanks\player.txt", JsonSerializer.Serialize(this.tank));
+                    Exit();
+                }
+                if (this.tank.HP < 0)
+                {
+                    Exit();
+                }
          
 
 
@@ -103,48 +139,58 @@ namespace TankGame
                 tank.bullet.Shoot();
             }
 
-            Window.Title = tank.ToString() + "\t size: "+tank.Size.X +" "+ tank.Size.Y;
+            
             if (key.IsKeyDown(Keys.Up))
             {
-                tank.Dir = Direction.FRONT;
-                    Tank check = new Tank(this.tank.Location,tank.Size,tank.Dir,tank.HP);
-                    //check.Move();
-                    
-                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(check.GetRectangle().X, check.GetRectangle().Y, check.GetRectangle().Width, check.GetRectangle().Height)) == Rectangle.Empty))))
+                    tank.Dir = Direction.FRONT;
+                    tank.Move();
+
+                    if (CollisionWall(tank))
                     {
+                        tank.Dir = Direction.BACK;
                         tank.Move();
-                    
+                        tank.Dir = Direction.FRONT;
                     }
+
             }
             else if (key.IsKeyDown(Keys.Down))
             {
-                tank.Dir = Direction.BACK;
-                    Tank check = new Tank(this.tank.Location, tank.Size, tank.Dir, tank.HP);
-                    //check.Move();
-                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(check.GetRectangle().X, check.GetRectangle().Y, check.GetRectangle().Width, check.GetRectangle().Height)) == Rectangle.Empty))))
+                    tank.Dir = Direction.BACK;
+                    tank.Move();
+
+                    if (CollisionWall(tank))
                     {
+                        tank.Dir = Direction.FRONT;
                         tank.Move();
+                        tank.Dir = Direction.BACK;
                     }
                 }
             else if (key.IsKeyDown(Keys.Left))
             {
                     tank.Dir = Direction.LEFT;
-                    Tank check = new Tank(this.tank.Location, tank.Size, tank.Dir, tank.HP);
-                   //check.Move();
-                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(check.GetRectangle().X, check.GetRectangle().Y, check.GetRectangle().Width, check.GetRectangle().Height)) == Rectangle.Empty))))
+                    tank.Move();
+
+                    if (CollisionWall(tank))
                     {
+                        tank.Dir = Direction.RIGHT;
                         tank.Move();
+                        tank.Dir = Direction.LEFT;
                     }
                 }
             else if (key.IsKeyDown(Keys.Right)) {
-                tank.Dir = Direction.RIGHT;
-                    Tank check = new Tank(this.tank.Location, tank.Size, tank.Dir, tank.HP);
-                    //check.Move();
-                    if (walls.Any((row) => row.Any((item => Rectangle.Intersect(new Rectangle(item.X, item.Y, 32, 32), new Rectangle(check.GetRectangle().X, check.GetRectangle().Y, check.GetRectangle().Width, check.GetRectangle().Height)) == Rectangle.Empty))))
+                    tank.Dir = Direction.RIGHT;
+                    tank.Move();
+
+                    if (CollisionWall(tank))
                     {
+                        tank.Dir = Direction.LEFT;
                         tank.Move();
+                        tank.Dir = Direction.RIGHT;
                     }
                 }
+
+
+
 
 
 
@@ -152,7 +198,7 @@ namespace TankGame
             if (tank.bullet.isFalling)
             {
                 tank.bullet.Move();
-                if (tank.bullet.Tick > 200)
+                if (tank.bullet.Tick > 700)
                 {
                     tank.bullet.isFalling = false;
                 }
@@ -205,6 +251,18 @@ namespace TankGame
 
 
             base.Update(gameTime);
+        }
+
+        private bool CollisionWall(Tank tank) {
+            bool check = false;
+            foreach (var item in this.walls) {
+                if (item.GetRectangle().IntersectsWith(tank.GetRectangle())) {
+                    Window.Title = tank.Location.X+" "+tank.Location.Y + "      "+item.X +" "+item.Y;
+                    //check = true;
+                    return true;
+                }
+            }
+            return check;
         }
 
         private void drawTank(Tank tank, bool isEnemy) {
@@ -279,16 +337,10 @@ namespace TankGame
             _spriteBatch.Begin();
 
 
-            walls.ToList().ForEach((row) =>
-            {
-                row.ForEach((item)=> {
-                    _spriteBatch.Draw(walltexture, new Rectangle(item.X,item.Y,32,32),Color.Orange);
-                });
+            walls.ForEach(wall=> {
+                _spriteBatch.Draw(walltexture, new Rectangle(wall.X, wall.Y, 32, 32), Color.Orange);
             });
 
-           // _spriteBatch.Draw(walltexture, new Vector2(walls[0][0].X, walls[0][0].Y), Color.Orange);
-
-            //drawTank(this.tank,false);
             try
             {
                 foreach (var t in tanks) {

@@ -17,7 +17,7 @@ namespace ServerConsole
             List<Tank> tanks = new List<Tank>();
             List<Task> tankThreads = new List<Task>();
             server.Start();
-
+            //Console.WriteLine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
             Task clientsUpdate = new Task(()=> {
                 while (true)
                 {
@@ -54,7 +54,7 @@ namespace ServerConsole
                                     }
                                     catch (Exception)
                                     {
-                                        Console.WriteLine("Lost Bytes");
+                                        //Console.WriteLine("Lost Bytes");
 
                                     }
 
@@ -91,7 +91,7 @@ namespace ServerConsole
                     catch (Exception)
                     {
 
-                        Console.WriteLine("Send Error!");
+                        //Console.WriteLine("Send Error!");
                     }
 
                 }

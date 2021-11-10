@@ -105,6 +105,7 @@ namespace TankLib {
             {
                 case Direction.FRONT:
                     this.Location = new Point(this.Location.X, this.Location.Y - this.Speed);
+
                     break;
                 case Direction.BACK:
                     this.Location = new Point(this.Location.X, this.Location.Y + this.Speed);
@@ -123,7 +124,7 @@ namespace TankLib {
         }
 
         public Rectangle GetRectangle() {
-            return new Rectangle(this.Location,new Size(this.Size));
+            return new Rectangle(this.Location.X-this.Size.X, this.Location.Y - this.Size.Y, this.Size.X*2, this.Size.Y*2);
         }
 
         public override string ToString()
