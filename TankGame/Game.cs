@@ -47,6 +47,18 @@ namespace TankGame
                     {
                         walls.Add(new Wall(j, i));
                     }
+                    if (i == 32*10 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32)) {
+                          walls.Add(new Wall(j, i));
+                      }
+                      if (i == 32 * 4 && (j >= Window.ClientBounds.Width * 0.20 && j <= Window.ClientBounds.Width * 0.8 - 32))
+                      {
+                        walls.Add(new Wall(j, i));
+                      }
+                      if (j == 32 * 12 && (i >= Window.ClientBounds.Height * 0.20 && i <= Window.ClientBounds.Height * 0.8 - 32)) {
+                        walls.Add(new Wall(j, i));
+                      }
+
+
                 }
             }
 
@@ -194,28 +206,7 @@ namespace TankGame
 
 
 
-
-            //if (tank.bullet.isFalling)
-            //{
-            //    tank.bullet.Move();
-            //        if (tank.bullet.Tick > 400)
-            //        {
-            //           tank.bullet.isFalling = false;
-            //        }
-            //        for(int i = 0;i < tanks.Count ;i++)
-            //        {
-            //            if (tanks[i].ToString()!=tank.ToString())
-            //            {
-            //                if (tank.bullet.Land(ref tanks, i)) {
-            //                    tanks[i].HP -= 25;
-            //                }
-            //            }
-            //        }
-            //}
-
-
             client.Send(Client.FromStringToBytes(JsonSerializer.Serialize<Tank>(this.tank)));
-                //tanks.Clear();
 
                 var item = Client.FromBytesToString(client.Get());
                 var tankarr = JsonSerializer.Deserialize<List<Tank>>(item);
@@ -254,7 +245,7 @@ namespace TankGame
                             }
                             else
                             {
-                                if (tank.bullet.Location.X < 0 || tank.bullet.Location.X > 800 || tank.bullet.Location.Y < 0 || tank.bullet.Location.Y > 600 || this.tanks.Where(t=>t.ToString()!=tank.ToString()).Any(t=>t.GetRectangle().IntersectsWith(tank.GetRectangle())))
+                                if (this.walls.Any(wall=>wall.GetRectangle().IntersectsWith(this.tank.bullet.GetRectangle()))|| tank.bullet.Location.X < 0 || tank.bullet.Location.X > 800 || tank.bullet.Location.Y < 0 || tank.bullet.Location.Y > 600 || this.tanks.Where(t=>t.ToString()!=tank.ToString()).Any(t=>t.GetRectangle().IntersectsWith(tank.GetRectangle())))
                                 {
 
                                     tank.bullet.isFalling = false;
@@ -266,7 +257,7 @@ namespace TankGame
                         }
 
                     }
-                                this.tank.bullet.Move();
+                      this.tank.bullet.Move();
 
                 //if (this.tank.bullet.isFalling)
                 //{
