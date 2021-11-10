@@ -20,7 +20,7 @@ namespace TankLib {
         public int Tick { set; get; }
         public Bullet()
         {
-            Location = new Point(0,0);
+            Location = new Point(32,32);
             Dir = Direction.NONE;
             isFalling = false;
         }
@@ -32,9 +32,13 @@ namespace TankLib {
             isFalling = false;
             Tick = 0;
         }
+        public Rectangle GetRectangle()
+        {
+            return new Rectangle(this.Location.X, this.Location.Y, 3, 3);
+        }
         public void Shoot() => this.isFalling = true;
         public bool Land(ref List<Tank> tank,int index) {
-            if (Rectangle.Intersect(new Rectangle(tank[index].Location, new Size(1, 1)), new Rectangle(this.Location, new Size(5, 5))) != Rectangle.Empty)
+            if (tank[index].GetRectangle().IntersectsWith(new Rectangle(this.Location.X,this.Location.Y,3,3)))
             {
                 this.isFalling = false;
                 return true;

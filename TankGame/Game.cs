@@ -195,23 +195,25 @@ namespace TankGame
 
 
 
-            if (tank.bullet.isFalling)
-            {
-                tank.bullet.Move();
-                if (tank.bullet.Tick > 700)
-                {
-                    tank.bullet.isFalling = false;
-                }
-                    for(int i = 0;i < tanks.Count ;i++)
-                    {
-                        if (tanks[i].ToString()!=tank.ToString())
-                        {
-                            if (tank.bullet.Land(ref tanks, i)) {
-                                tanks[i].HP -= 25;
-                            }
-                        }
-                    }
-            }
+            //if (tank.bullet.isFalling)
+            //{
+            //    tank.bullet.Move();
+            //        if (tank.bullet.Tick > 400)
+            //        {
+            //           tank.bullet.isFalling = false;
+            //        }
+            //        for(int i = 0;i < tanks.Count ;i++)
+            //        {
+            //            if (tanks[i].ToString()!=tank.ToString())
+            //            {
+            //                if (tank.bullet.Land(ref tanks, i)) {
+            //                    tanks[i].HP -= 25;
+            //                }
+            //            }
+            //        }
+            //}
+
+
             client.Send(Client.FromStringToBytes(JsonSerializer.Serialize<Tank>(this.tank)));
                 //tanks.Clear();
 
@@ -236,8 +238,63 @@ namespace TankGame
 
                 GC.Collect(GC.GetGeneration(item));
 
+                    foreach (var i in this.tanks)
+                    {
+                        if (i.bullet.isFalling)
+                        {
+                            if (i.ToString() != tank.ToString())
+                            {
 
+                                Window.Title = i.bullet.Location.X.ToString();
+                                if (this.tank.GetRectangle().IntersectsWith(new System.Drawing.Rectangle(i.bullet.Location.X, i.bullet.Location.Y, 3, 3)))
+                                {
+                                    this.tank.HP -= 25;
+                                    i.bullet.isFalling = false;
+                                }
+                            }
+                            else
+                            {
+                                if (tank.bullet.Location.X < 0 || tank.bullet.Location.X > 800 || tank.bullet.Location.Y < 0 || tank.bullet.Location.Y > 600 || this.tanks.Where(t=>t.ToString()!=tank.ToString()).Any(t=>t.GetRectangle().IntersectsWith(tank.GetRectangle())))
+                                {
 
+                                    tank.bullet.isFalling = false;
+                                }
+
+                            }
+                            //i.Move();
+
+                        }
+
+                    }
+                                this.tank.bullet.Move();
+
+                //if (this.tank.bullet.isFalling)
+                //{
+                //    this.tank.bullet.Move();
+                //    if (tank.bullet.Location.X < 0 || tank.bullet.Location.X > 800 || tank.bullet.Location.Y < 0 || tank.bullet.Location.Y > 600 || this.tanks.Where((t) => t.ToString() != tank.ToString()).Any(t=>t.GetRectangle().IntersectsWith(new System.Drawing.Rectangle(tank.bullet.Location.X, tank.bullet.Location.Y,3,3))))
+                //    {
+                //        tank.bullet.isFalling = false;
+                //    }
+                //}
+
+                //foreach (var itemt in this.tanks)
+                //{
+                //    if (itemt.ToString() != tank.ToString())
+                //    {
+                //        try
+                //        {
+                //            if (this.tank.GetRectangle().IntersectsWith(new System.Drawing.Rectangle(itemt.bullet.Location.X, itemt.bullet.Location.Y, 3, 3))) {
+                //                this.tank.HP-=25;
+                //            }
+
+                //        }
+                //        catch (Exception)
+                //        {
+
+                         
+                //        }
+                //    }
+                //}
 
 
             }
